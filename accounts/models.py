@@ -1,0 +1,26 @@
+from distutils.command.upload import upload
+from email.policy import default
+from django.db import models
+from django.contrib.auth.models import User
+
+#to resize the image, just shows error unnecessarily
+
+from PIL import Image
+
+# Create your models here.
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(default = 'profile_pics/default.jpg',upload_to = 'profile_pics')
+    def __str__(self):
+        return f'{self.user.username} Profile '
+    
+    #to resize the images uploadedd using pillow
+    #in save it requires some parametres so we need to pass them all in order to work
+    def save(self,*args, **kwargs):
+        super(Profile,self).save(*args,**kwargs)
+        img = Image.open(self.image.path)
+        if img.height> 300 or img.width>300:
+            output_size =(300,300)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
+
